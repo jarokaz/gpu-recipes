@@ -18,15 +18,19 @@ volumes:
   # The VM host path for SSDs is assumed at /mnt/stateful_partition/kube-ephemeral-ssd
   ssdMountPath: "/ssd"
 
+gcsDownload: # downloads or synchronizes contents of a GCS bucket folder on initialization
+  source: "gs://nemo-megatron-demo/training-data/tokenized/sentencepiece-llama2/wikipedia"
+  target: "/ssd/.cache/"
+
 workload:
   torchDistributedTarget: "/opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py"
-  gpus: 64 # This should be one of: [128, 256]
+  gpus: 32 # This should be one of: [128, 256]
 
 network:
   stack: "tcpxo"
 
-  daemonVersion: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/tcpgpudmarxd-dev:v1.0.9"
-  pluginVersion: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/nccl-plugin-gpudirecttcpx-dev:v1.0.3"
+  daemonVersion: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/tcpgpudmarxd-dev:v1.0.9" # 1.0.8
+  pluginVersion: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/nccl-plugin-gpudirecttcpx-dev:v1.0.3" #1.0.2
 
   ncclSettings:
   - name: NCCL_DEBUG
@@ -36,4 +40,5 @@ network:
   # The following NCCL settings are recommended for TCPxo only (but tunable):
   - name: NCCL_MIN_NCHANNELS
     value: "4"
+
  

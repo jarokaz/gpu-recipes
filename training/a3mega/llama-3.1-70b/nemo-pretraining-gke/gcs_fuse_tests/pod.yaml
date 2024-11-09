@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gcs-fuse-csi-example-static-pvc
+  namespace: default 
+  annotations:
+    gke-gcsfuse/volumes: "true"
+spec:
+  containers:
+  - image: busybox
+    name: busybox
+    command: ["sleep"]
+    args: ["infinity"]
+    volumeMounts:
+    - name: gcs-fuse-csi-static
+      mountPath: /data
+      readOnly: true
+  volumes:
+  - name: gcs-fuse-csi-static
+    persistentVolumeClaim:
+      claimName: gcs-fuse-csi-static-pvc
+      readOnly: true
+  tolerations:
+  - operator: "Exists"
+    key: nvidia.com/gpu
+  - operator: "Exists"
+    key: cloud.google.com/impending-node-termination

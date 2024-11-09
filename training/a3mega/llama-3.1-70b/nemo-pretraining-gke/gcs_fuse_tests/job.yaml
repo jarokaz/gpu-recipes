@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gcs-fuse-csi-job-example
+  namespace: default
+spec:
+  template:
+    metadata:
+      annotations:
+        gke-gcsfuse/volumes: "true"
+    spec:
+      containers:
+      - name: writer
+        image: busybox
+        command:
+          - "/bin/sh"
+          - "-c"
+          - touch /data/test && echo $(date) >> /data/test && sleep 10
+        volumeMounts:
+        - name: gcs-fuse-csi-ephemeral
+          mountPath: /data
+      - name: reader
+        image: busybox
+        command:
+          - "/bin/sh"
+          - "-c"
+          - sleep 10 && cat /data/test
+        volumeMounts:
+        - name: gcs-fuse-csi-ephemeral
+          mountPath: /data
+          readOnly: true
+      volumes:
+      - name: gcs-fuse-csi-ephemeral
+        csi:
+          driver: gcsfuse.csi.storage.gke.io
+          volumeAttributes:
+            bucketName: jarekk-us-central1-checkpoints
+      restartPolicy: Never
+      tolerations:
+      - operator: "Exists"
+        key: nvidia.com/gpu
+      - operator: "Exists"
+        key: cloud.google.com/impending-node-termination
+
+  backoffLimit: 1
